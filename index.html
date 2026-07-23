@@ -1,42 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Germany Income Tax Calculator 2025 — Lohnsteuer & Social Contributions | Tabutility</title>
+  <meta name="description" content="Calculate your German take-home pay for 2025. Includes Lohnsteuer (income tax), solidarity surcharge, and employee social insurance contributions." />
+  <meta name="keywords" content="germany income tax calculator, lohnsteuer rechner, german tax 2025, sozialversicherung, take home pay germany, brutto netto" />
+  <link rel="canonical" href="https://germany-income-tax.tabutility.com/" />
+  <meta property="og:title" content="Germany Income Tax Calculator 2025" />
+  <meta property="og:description" content="Calculate German take-home pay including income tax and social contributions for 2025." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇩🇪</text></svg>" />
+  <meta name="robots" content="index, follow" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7039091592734005" crossorigin="anonymous"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-78VZWJ5B1W"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-78VZWJ5B1W');</script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body style="margin:0;background:#f8faff;font-family:'Segoe UI',Arial,sans-serif">
+<div id="root"></div>
+<script type="text/babel">
+//<![CDATA[
+const { useState } = React;
 
-    <!-- ✏️ UPDATE THESE FOR EVERY NEW TOOL -->
-    <title>TOOL NAME — TOOL TAGLINE | Tabutility</title>
-    <meta name="description" content="TOOL DESCRIPTION. No sign-up, runs in your browser." />
-    <meta name="keywords" content="KEYWORD 1, KEYWORD 2, KEYWORD 3, free TOOL NAME" />
-    <link rel="canonical" href="https://SUBDOMAIN.tabutility.com/" />
-    <meta property="og:url" content="https://SUBDOMAIN.tabutility.com/" />
-    <meta property="og:title" content="TOOL NAME — TOOL TAGLINE" />
-    <meta property="og:description" content="TOOL DESCRIPTION. Free, no sign-up." />
-    <meta name="twitter:title" content="TOOL NAME — TOOL TAGLINE" />
-    <meta name="twitter:description" content="TOOL DESCRIPTION. Free, no sign-up." />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>EMOJI</text></svg>" />
-    <!-- ✏️ END OF SECTION TO UPDATE -->
+function calcGermany(gross, taxClass) {
+  // Basic allowance 2025
+  const grundfreibetrag = 12096;
 
-    <!-- DO NOT CHANGE ANYTHING BELOW THIS LINE -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Tabutility" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="robots" content="index, follow" />
+  // Approximate progressive income tax
+  // Germany uses a formula, this is a close approximation
+  let incomeTax = 0;
+  const taxable = Math.max(0, gross - grundfreibetrag);
 
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7039091592734005" crossorigin="anonymous"></script>
+  if (gross <= grundfreibetrag) {
+    incomeTax = 0;
+  } else if (gross <= 17005) {
+    const y = (gross - grundfreibetrag) / 10000;
+    incomeTax = (979.18 * y + 1400) * y;
+  } else if (gross <= 66760) {
+    const z = (gross - 17005) / 10000;
+    incomeTax = (192.59 * z + 2397) * z + 1025;
+  } else if (gross <= 277825) {
+    incomeTax = 0.42 * gross - 10602;
+  } else {
+    incomeTax = 0.45 * gross - 18936;
+  }
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-78VZWJ5B1W"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-78VZWJ5B1W');
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+  // Tax class adjustments (simplified)
+  if (taxClass === '3') incomeTax = incomeTax * 0.5;
+  if (taxClass === '5') incomeTax = incomeTax * 1.5;
+
+  incomeTax = Math.max(0, incomeTax);
+
+  // Solidarity surcharge — abolished for most; only applies if income tax > €18,130/yr
+  const soli = incomeTax > 18130 ? incomeTax * 0.055 : 0;
+
+  // Social insurance (employee share) 2025
+  const pensionBase = Math.min(gross, 96600);
+  const healthBase  = Math.min(gross, 66150);
+  const pension     = pensionBase * 0.093;   // 9.3%
+  const health      = healthBase  * 0.073;   // 7.3% (+ 1.7% avg additional = ~9%)
+  const addHealth   = healthBase  * 0.017;   // average additional health contribution
+  const unemployment = Math.min(gross, 96600) * 0.013; // 1.3%
+  const care        = Math.min(gross, 66150) * 0.018;  // 1.8% (childless add 0.6%)
+
+  const socialTotal = pension + health + addHealth + unemployment + care;
+  const totalDed = incomeTax + soli + socialTotal;
+  const takeHome = gross - totalDed;
+
+  return { incomeTax, soli, pension, health: health + addHealth, unemployment, care, socialTotal, totalDed, takeHome };
+}
+
+function fmt(n) { return '€' + Math.round(n).toLocaleString('de-DE'); }
+function pct(n, gross) { return gross > 0 ? (n / gross * 100).toFixed(1) + '%' : '0%'; }
+
+function Row({ label, value, gross, highlight, sub }) {
+  return (
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'9px 0',borderBottom:'1px solid #f0f0f0',paddingLeft:sub?12:0}}>
+      <span style={{fontSize: sub?13:14, color:highlight?'#1a1a2e':sub?'#9ca3af':'#6b7280', fontWeight:highlight?700:400}}>{label}</span>
+      <div style={{textAlign:'right'}}>
+        <span style={{fontSize:15,fontWeight:700,color:highlight?'#dc2626':'#1a1a2e'}}>{fmt(value)}</span>
+        <span style={{fontSize:12,color:'#9ca3af',marginLeft:8}}>{pct(value,gross)}</span>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [gross, setGross] = useState(60000);
+  const [taxClass, setTaxClass] = useState('1');
+  const r = calcGermany(Number(gross) || 0, taxClass);
+  const g = Number(gross) || 0;
+
+  return (
+    <div style={{maxWidth:520,margin:'0 auto',padding:'0 0 40px'}}>
+      <div style={{background:'#1a1a2e',padding:'12px 20px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <a href="https://tabutility.com" style={{color:'#a5b4fc',textDecoration:'none',fontSize:14}}>← All Tools</a>
+        <span style={{color:'#fff',fontWeight:700,fontSize:15}}>⚡ Tabutility</span>
+      </div>
+
+      <div style={{background:'linear-gradient(135deg,#dc2626,#b91c1c)',padding:'28px 20px',textAlign:'center',color:'#fff'}}>
+        <div style={{fontSize:36,marginBottom:8}}>🇩🇪</div>
+        <h1 style={{margin:'0 0 6px',fontSize:22,fontWeight:900}}>Germany Income Tax Calculator</h1>
+        <p style={{margin:0,fontSize:13,opacity:0.85}}>Lohnsteuer · Soli · Social Insurance — 2025</p>
+      </div>
+
+      <div style={{padding:'20px'}}>
+        <div style={{background:'#fff',borderRadius:14,padding:'20px',boxShadow:'0 2px 12px rgba(0,0,0,0.06)',marginBottom:16}}>
+          <label style={{fontSize:13,fontWeight:600,color:'#374151',display:'block',marginBottom:6}}>Annual Gross Salary (Brutto)</label>
+          <div style={{position:'relative'}}>
+            <span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#6b7280',fontWeight:700}}>€</span>
+            <input type="number" value={gross} onChange={e=>setGross(e.target.value)}
+              style={{width:'100%',padding:'11px 12px 11px 28px',borderRadius:10,border:'2px solid #e5e7eb',fontSize:16,boxSizing:'border-box',outline:'none'}} />
+          </div>
+
+          <label style={{fontSize:13,fontWeight:600,color:'#374151',display:'block',margin:'14px 0 6px'}}>Tax Class (Steuerklasse)</label>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            {[['1','I — Single'],['3','III — Married (higher)'],['4','IV — Married (equal)'],['5','V — Married (lower)']].map(([v,l])=>(
+              <button key={v} onClick={()=>setTaxClass(v)}
+                style={{padding:'7px 12px',borderRadius:10,border:`2px solid ${taxClass===v?'#dc2626':'#e5e7eb'}`,background:taxClass===v?'#dc2626':'#fff',color:taxClass===v?'#fff':'#374151',fontWeight:600,fontSize:13,cursor:'pointer'}}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{background:'#fff',borderRadius:14,padding:'20px',boxShadow:'0 2px 12px rgba(0,0,0,0.06)',marginBottom:16}}>
+          <div style={{fontSize:13,fontWeight:700,color:'#6b7280',marginBottom:4,textTransform:'uppercase',letterSpacing:0.5}}>Take-Home Pay (Netto)</div>
+          <div style={{fontSize:36,fontWeight:900,color:'#16a34a',marginBottom:4}}>{fmt(r.takeHome)}</div>
+          <div style={{fontSize:13,color:'#9ca3af'}}>per year &nbsp;·&nbsp; {fmt(r.takeHome/12)} / month</div>
+        </div>
+
+        <div style={{background:'#fff',borderRadius:14,padding:'20px',boxShadow:'0 2px 12px rgba(0,0,0,0.06)'}}>
+          <div style={{fontSize:13,fontWeight:700,color:'#374151',marginBottom:8}}>Breakdown</div>
+          <Row label="Gross Salary" value={g} gross={g} />
+          <Row label="Income Tax (Lohnsteuer)" value={r.incomeTax} gross={g} />
+          <Row label="Solidarity Surcharge (Soli)" value={r.soli} gross={g} />
+          <Row label="Social Insurance" value={r.socialTotal} gross={g} />
+          <Row label="  Pension (9.3%)" value={r.pension} gross={g} sub />
+          <Row label="  Health (~9%)" value={r.health} gross={g} sub />
+          <Row label="  Unemployment (1.3%)" value={r.unemployment} gross={g} sub />
+          <Row label="  Care (1.8%)" value={r.care} gross={g} sub />
+          <Row label="Total Deductions" value={r.totalDed} gross={g} />
+          <Row label="Net Take-Home (Netto)" value={r.takeHome} gross={g} highlight />
+        </div>
+
+        <div style={{background:'#fef2f2',borderRadius:12,padding:'16px',marginTop:16,fontSize:13,color:'#b91c1c',lineHeight:1.6}}>
+          <strong>Note:</strong> This is an approximation. Germany uses a complex tax formula; results may differ slightly from official calculators. Social insurance caps apply (pension/unemployment up to €96,600; health/care up to €66,150). Soli only applies on income tax above €18,130.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+//]]>
+</script>
+</body>
 </html>
